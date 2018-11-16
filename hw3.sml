@@ -85,6 +85,7 @@ fun check_pat (p : pattern) =
 		 	  Variable x => [x]
 		 	  | TupleP ps => List.foldl (fn (x,l) => l@get_strings(x)) [] ps
 		 	  | ConstructorP (_,py) => get_strings(py)
+			  | _ => []
 		fun check_repeat (ls : string list) =
 			case ls of
 				[] => true
@@ -112,7 +113,7 @@ datatype typ = Anything (* any type of value is okay *)
 				| TupleT of typ list (* tuple types *)
 				| Datatype of string (* some named datatype *)
 
-fun typecheck_patterns (ls:(string*string*typ) list) pl =
+fun typecheck_patterns ((ls:(string*string*typ) list), pl) =
 	let
 		exception TypeMismatchError
 
