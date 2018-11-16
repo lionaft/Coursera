@@ -54,18 +54,14 @@
 (define (cached-assoc xs n)
   (letrec ([memo (make-vector n #f)]
            [x 0]
+           [y (- n 1)]
            [f (λ (v)
                 (let ([res (vector-assoc v memo)])
-                  (if res
-                      (if res
-                          res
-                          (let ([r (assoc v xs)])
-                            (begin (vector-set! memo x r)
-                                   (set! x (if (= x (- n 1)) 0 (+ x 1)))
-                                   r)))
+                  (if res                     
+                      res
                       (let ([r (assoc v xs)])
                         (begin (vector-set! memo x r)
-                               (set! x (if (= x (- n 1)) 0 (+ x 1)))
+                               (set! x (if (= x y) 0 (+ x 1)))
                                r)))))])
     f))
                             
