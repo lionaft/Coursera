@@ -47,33 +47,34 @@
   (letrec ([len (vector-length vec)]
            [f (λ (n)
                 (cond  [(= len n) false]
-                       [(equal? v (car (vector-ref vec n))) (vector-ref vec n)]
+                       [(pair? (vector-ref vec n)) (if (equal? v (car (vector-ref vec n))) (vector-ref vec n) (f (+ n 1)))]
                        [else (f (+ n 1))]))])
     (f 0)))
 
 (define (cached-assoc xs n)
-  (letrec ([memo (make-vector n (cons 0 #f))]
+  (letrec ([memo (make-vector n #f)]
            [x 0]
            [f (λ (v)
                 (let ([res (vector-assoc v memo)])
                   (if res
-                      (if (cdr res)
-                          (cdr res)
+                      (if res
+                          res
                           (let ([r (assoc v xs)])
-                            (begin (vector-set! memo x (cons v r))
-                                   (set! x (if (= x n) 0 (+ x 1)))
+                            (begin (vector-set! memo x r)
+                                   (set! x (if (= x (- n 1)) 0 (+ x 1)))
                                    r)))
                       (let ([r (assoc v xs)])
-                        (begin (vector-set! memo x (cons v r))
-                               (set! x (if (= x n) 0 (+ x 1)))
+                        (begin (vector-set! memo x r)
+                               (set! x (if (= x (- n 1)) 0 (+ x 1)))
                                r)))))])
     f))
                             
 (define-syntax while-less
   (syntax-rules (do)
     [(while-less e1 do e2)
-     (letrec ([f (λ ()
-                   (if (< e2 e1)
+     (letrec ([e e1]
+              [f (λ ()
+                   (if (< e2 e)
                        (f)
                        #t))])
        (f))]))
