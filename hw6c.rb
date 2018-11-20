@@ -13,7 +13,7 @@ class MyPiece < Piece
                   rotations([[0, 0], [0, -1], [0, 1], [-1, 1]]), # inverted L
                   rotations([[0, 0], [-1, 0], [0, -1], [1, -1]]), # S
                   rotations([[0, 0], [1, 0], [0, -1], [-1, -1]]), # Z
-                  rotations([[0, 0], [-1, 0], [0, -1], [-1, -1], [1, -1]]),
+                  rotations([[0, 0], [-1, 0], [1, 0], [0, 1], [-1, 1]]),
                   [[[0, 0], [-1, 0], [-2, 0], [1, 0], [2, 0]],
                   [[0, 0], [0, -1], [0, -2], [0, 1], [0, 2]]],
                   rotations([[0, 0], [0, 1], [1, 0]])]
@@ -77,7 +77,7 @@ class MyBoard < Board
 
   def next_piece
     if @cheat
-      @current_block = MyPiece.new([[0, 0]], self)
+      @current_block = MyPiece.new([[[0, 0]]], self)
       @cheat = false
     else
       @current_block = MyPiece.next_piece(self)
