@@ -103,23 +103,13 @@
 (define (ifaunit e1 e2 e3) (ifgreater (isaunit e1) (int 0) e2 e3))
 
 (define (mlet* lstlst e2)
-  (letrec ([mlet-help (λ(lst acc)
-                        (cond [(null? lst) acc]
-                              [else
-                               (letrec ([s (car (car lst))]
-                                        [v (cdr (car lst))]
-                                        [evale (eval-under-env v acc)])
-                                 (mlet-help (cdr lstlst) (cons (cons s evale) acc)))]))])
-    (eval-under-env e2 (mlet-help lstlst null))))
+  (cond [(null? lstlst) e2]
+        [else (mlet (car (car lstlst)) (cdr (car lstlst)) (mlet* (cdr lstlst) e2))]))
 
 (define (ifeq e1 e2 e3 e4)
-  (let ([_x (eval-exp e1)]
-        [_y (eval-exp e2)])
-    (if (and (int? _x) (int? _y))
-        (if (= (int-num _x) (int-num _y))
-            (eval-exp e3)
-            (eval-exp e4))
-        (error (format "bad MUPL expression: ~v ~v" e1 e2)))))
+  (mlet* (list (cons "_x" e1) (cons "_y" e2)) (ifgreater (var "_x") (var "_y")
+                                                         e4
+                                                         (ifgreater (var "_y") (var "_x") e4 e3))))
 
 ;; Problem 4
 
@@ -158,9 +148,17 @@
                          [(isaunit? exp) (help (isaunit-e exp))]
                          [(closure? exp) (help (closure-fun exp))]
                          [else (set)]))])
-    (if (fun? e)
-        (fun-challenge (fun-nameopt e) (fun-formal e) (fun-body e) (help e))
-        (e))))
+    (cond [(add? e) (add (compute-free-vars (add-e1 e)) (compute-free-vars (add-e2 e)))]
+          [(ifgreater? e) (ifgreater (compute-free-vars (ifgreater-e1 e)) (compute-free-vars (ifgreater-e2 e)) (compute-free-vars (ifgreater-e3 e)) (compute-free-vars (ifgreater-e4 e)))]
+          [(fun? e) (fun-challenge (fun-nameopt e) (fun-formal e) (compute-free-vars (fun-body e)) (help e))]
+          [(call? e) (call (compute-free-vars (call-funexp e)) (compute-free-vars (call-actual e)))]
+          [(mlet? e) (mlet (mlet-var e) (compute-free-vars (mlet-e e)) (compute-free-vars (mlet-body e)))]
+          [(apair? e) (apair (compute-free-vars (apair-e1 e)) (compute-free-vars (apair-e2 e)))]
+          [(fst? e) (fst (compute-free-vars (fst-e e)))]
+          [(snd? e) (snd (compute-free-vars (snd-e e)))]
+          [(isaunit? e) (isaunit (compute-free-vars (isaunit-e e)))]
+          [(closure? e) (closure (compute-free-vars (closure-env e)) (compute-free-vars (closure-fun e)))]
+          [else e])))
                       
 
 ;; Do NOT share code with eval-under-env because that will make
