@@ -331,6 +331,9 @@ class Intersect < GeometryExpression
   def preprocess_prog
     Intersect.new(@e1.preprocess_prog, @e2.preprocess_prog)
   end
+  def shift(dx,dy)
+    Shift.new(dx,dy.self)
+  end
 end
 
 class Let < GeometryExpression
@@ -343,10 +346,13 @@ class Let < GeometryExpression
     @e2 = e2
   end
   def eval_prog env
-    @e2.eval_prog(env.unshift([@s,@e1.eval_prog(env)]))
+    @e2.eval_prog([[@s,@e1]]+env)
   end
   def preprocess_prog
     Let.new(@s,@e1.preprocess_prog,@e2.preprocess_prog)
+  end
+  def shift(dx,dy)
+    Shift.new(dx,dy,self)
   end
 end
 
@@ -364,6 +370,9 @@ class Var < GeometryExpression
     raise "undefined variable" if pr.nil?
     pr[1]
   end
+  def shift(dx,dy)
+    Shift.new(dx,dy,self)
+  end
 end
 
 class Shift < GeometryExpression
@@ -379,5 +388,8 @@ class Shift < GeometryExpression
   end
   def preprocess_prog
     Shift.new(@dx,@dy,@e.preprocess_prog)
+  end
+  def shift(dx,dy)
+    Shift.new(dx,dy,self)
   end
 end
