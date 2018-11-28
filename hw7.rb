@@ -332,7 +332,7 @@ class Intersect < GeometryExpression
     Intersect.new(@e1.preprocess_prog, @e2.preprocess_prog)
   end
   def shift(dx,dy)
-    Shift.new(dx,dy.self)
+    Shift.new(dx,dy,self)
   end
 end
 
