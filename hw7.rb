@@ -346,7 +346,7 @@ class Let < GeometryExpression
     @e2 = e2
   end
   def eval_prog env
-    @e2.eval_prog([[@s,@e1]]+env)
+    @e2.eval_prog([[@s,@e1.eval_prog(env)]]+env)
   end
   def preprocess_prog
     Let.new(@s,@e1.preprocess_prog,@e2.preprocess_prog)
@@ -384,7 +384,7 @@ class Shift < GeometryExpression
     @e = e
   end
   def eval_prog env
-    @e.shift(@dx,@dy)
+    @e.eval_prog(env).shift(@dx,@dy)
   end
   def preprocess_prog
     Shift.new(@dx,@dy,@e.preprocess_prog)
